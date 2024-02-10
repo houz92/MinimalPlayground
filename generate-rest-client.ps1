@@ -1,0 +1,4 @@
+# dotnet tool install --local NSwag.ConsoleCore --version 14.0.3
+dotnet swagger tofile --output $PSScriptRoot\openapi.json $PSScriptRoot\src\MinimalPlayground\bin\Debug\net8.0\MinimalPlayground.dll v1
+dotnet nswag openapi2csclient /input:$PSScriptRoot\openapi.json /classname:WeatherClient /namespace:MinimalPlayground /output:$PSScriptRoot\src\MinimalPlayground.Client\WeatherClient.cs
+#dotnet "C:\Users\zam95\.nuget\packages\nswag.msbuild\14.0.3\buildTransitive\../tools/Net60/dotnet-nswag.dll" openapi2csclient /input:D:\Sources\MinimalPlayground\src\MinimalPlayground\bin\Debug\net8.0\openapi.json  /classname:WeatherClient /namespace:MinimalPlayground /output:D:\Sources\MinimalPlayground\\src\MinimalPlayground.Client\WeatherClient.cs

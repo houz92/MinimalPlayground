@@ -1,0 +1,6 @@
+@minimalPlayground_HostAddress = http://localhost:5262
+
+GET {{minimalPlayground_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
