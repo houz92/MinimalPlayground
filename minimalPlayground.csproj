@@ -9,7 +9,33 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+
+
+  <!-- Generate openapi.json on build; see
+   https://github.com/domaindrivendev/Swashbuckle.AspNetCore#using-the-tool-with-the-net-core-30-sdk-or-later -->
+    <Target Name="OpenAPI" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
+      <Exec Command="dotnet swagger tofile --output openapi.json $(TargetPath) v1" WorkingDirectory="$(TargetDir)" />
+    </Target>
+
+    <Target Name="NSwag" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+      <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net60) run $(TargetDir)openapi.json /variables:Configuration=$(Configuration)" />
+    </Target>
+
+  <Target Name="GenerateWeatherClient" BeforeTargets="CoreCompile" Inputs="$(TargetDir)openapi.json" Outputs="$(ProjectDir)\WeatherClient.cs">
+    <Exec Command="$(NSwagExe_Net60) openapi2csclient /input:$(TargetDir)openapi.json  /classname:WeatherClient /namespace:MyClient /output:$(ProjectDir)\WeatherClient.cs" ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+  </Target>
 </Project>
