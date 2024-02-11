@@ -72,7 +72,10 @@ public static class WeatherEndpoint
     {
         [JsonPropertyName("$type")]
         [JsonPropertyOrder(-1)]
-        public string Discriminator => this.GetType().Name;
+        public string Discriminator { 
+            get => GetType().Name;
+            init { }
+        }
         
         public Guid Id { get; set; }
 
