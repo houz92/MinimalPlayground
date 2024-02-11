@@ -1,4 +1,6 @@
+using System.Reflection;
 using MinimalPlayground;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +8,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = builder.Environment.ApplicationName, Version = "v1" });
+    options.UseAllOfForInheritance();
+    options.UseOneOfForPolymorphism();
+    options.ExampleFilters();
 });
+
+builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 
 var app = builder.Build();
 

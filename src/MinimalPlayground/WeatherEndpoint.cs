@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Any;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace MinimalPlayground;
 
@@ -42,18 +44,13 @@ public static class WeatherEndpoint
                 return opt;
             });
         
-        app.MapGet("/complexInput", ([Required]AbstractSetting setting) => new SomeResult { IsOk = true, Setting = setting })
+        app.MapPost("/complexInput", ([Required][FromBody]AbstractSetting setting) 
+                => new SomeResult { IsOk = true, Setting = setting })
             .WithName("ProcessComplexBody")
             .WithOpenApi(opt =>
             {
                 opt.Summary = "Checking how complex body with inheritance is handled";
                 opt.Description = "A complex input and output example";
-                // opt.Parameters[0].Examples.Add("doubleSetting", new OpenApiObject(new DoubleSetting
-                // {
-                //     Id = new Guid("8AF6FAEE-6F52-438A-9146-B59D6F3E580F"),
-                //     Number = 99,
-                //     Name = "My example"
-                // }));
                 
                 return opt;
             });
@@ -75,14 +72,14 @@ public static class WeatherEndpoint
         public string Name { get; set; }
     }
     
-    public abstract class DoubleSetting : AbstractSetting
+    public class DoubleSetting : AbstractSetting
     {
         public double Number { get; set; }
     }
     
-    public abstract class StringSetting : AbstractSetting
+    public class CommentSetting : AbstractSetting
     {
-        public double Comment { get; set; }
+        public string Comment { get; set; }
     }
 
     public class SomeResult
@@ -90,5 +87,31 @@ public static class WeatherEndpoint
         public bool IsOk { get; set; }
 
         public AbstractSetting Setting { get; set; }
+    }
+
+    public class AbstractSettingExampleProvider : IMultipleExamplesProvider<AbstractSetting>
+    {
+        public IEnumerable<SwaggerExample<AbstractSetting>> GetExamples()
+        {
+            yield return SwaggerExample.Create<AbstractSetting>(
+                name: "Double setting", 
+                value: new DoubleSetting
+                {
+                    Id   = new Guid("96C74E6F-9F90-4D04-A61E-173CA9849792"),
+                    Name = "A double setting example",
+                    Number = 123.456
+                }
+            );
+            
+            yield return SwaggerExample.Create<AbstractSetting>(
+                name: "Comment setting", 
+                value: new CommentSetting() 
+                {
+                    Id   = new Guid("1B1134C0-D329-40E3-8F82-B3DDFFB819CF"),
+                    Name = "A string setting example",
+                    Comment = "Weather is nice today"
+                }
+            ); 
+        }
     }
 }
