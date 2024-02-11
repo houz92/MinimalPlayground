@@ -13,6 +13,11 @@ builder.Services.AddSwaggerGen(options =>
     options.ExampleFilters();
 });
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, new WeatherEndpoint.PolymorphicTypeResolver());
+});
+
 builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 
 var app = builder.Build();

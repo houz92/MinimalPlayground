@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Any;
 using Swashbuckle.AspNetCore.Filters;
@@ -64,9 +67,13 @@ public static class WeatherEndpoint
     }
 
     record Hello(string Message);
-
+    
     public abstract class AbstractSetting
     {
+        [JsonPropertyName("$type")]
+        [JsonPropertyOrder(-1)]
+        public string Discriminator => this.GetType().Name;
+        
         public Guid Id { get; set; }
 
         public string Name { get; set; }
@@ -109,9 +116,35 @@ public static class WeatherEndpoint
                 {
                     Id   = new Guid("1B1134C0-D329-40E3-8F82-B3DDFFB819CF"),
                     Name = "A string setting example",
-                    Comment = "Weather is nice today"
+                    Comment = "Weather is nice today",
                 }
             ); 
+        }
+    }
+    
+    public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
+    {
+        public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
+        {
+            JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
+
+            Type baseSettingType = typeof(AbstractSetting);
+            if (jsonTypeInfo.Type == baseSettingType)
+            {
+                jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+                {
+                    TypeDiscriminatorPropertyName = "$type",
+                    IgnoreUnrecognizedTypeDiscriminators = true,
+                    UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                    DerivedTypes =
+                    {
+                        new JsonDerivedType(typeof(DoubleSetting), typeof(DoubleSetting).Name),
+                        new JsonDerivedType(typeof(CommentSetting), typeof(CommentSetting).Name)
+                    }
+                };
+            }
+
+            return jsonTypeInfo;
         }
     }
 }
