@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 using MinimalPlayground;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -11,6 +12,9 @@ builder.Services.AddSwaggerGen(options =>
     options.UseAllOfForInheritance();
     options.UseOneOfForPolymorphism();
     options.ExampleFilters();
+    
+    options.MapType<TimeSpan>(() => new OpenApiSchema { Type = "string", Format = "0.00:00:00", Reference = null, Nullable = false });
+    options.MapType<TimeSpan?>(() => new OpenApiSchema { Type = "string", Format = "0.00:00:00", Reference = null, Nullable = true });
 });
 
 builder.Services.ConfigureHttpJsonOptions(options =>

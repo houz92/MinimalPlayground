@@ -90,6 +90,8 @@ public static class WeatherEndpoint
     public class CommentSetting : AbstractSetting
     {
         public string Comment { get; set; }
+        
+        public TimeSpan Duration { get; set; }
     }
 
     public class SomeResult
@@ -120,6 +122,7 @@ public static class WeatherEndpoint
                     Id   = new Guid("1B1134C0-D329-40E3-8F82-B3DDFFB819CF"),
                     Name = "A string setting example",
                     Comment = "Weather is nice today",
+                    Duration = TimeSpan.FromDays(1).Add(TimeSpan.FromHours(5))
                 }
             ); 
         }
